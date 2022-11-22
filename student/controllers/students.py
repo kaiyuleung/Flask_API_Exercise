@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import jsonify
 from werkzeug.exceptions import BadRequest
 
 from ..models.student import Student
