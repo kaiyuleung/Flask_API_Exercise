@@ -1,3 +1,3 @@
-from app import app
+from student import app
 
 app.run()
