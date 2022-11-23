@@ -22,7 +22,3 @@ with app.app_context():
     for student in students:
         db.session.add(Student(name = student['name'], age = student['age']))
     db.session.commit()
-
-
-
-

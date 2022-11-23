@@ -41,7 +41,7 @@ def show(req, uid):
     foundStudent = find_by_uid(uid)
     #* Dictionary instance
     output = {"name": foundStudent.name, "age": foundStudent.age}
-    print(f'{Format.BLUE}{Format.BOLD} {Format.CLEAR}\n', output)
+    print(f'{Format.BLUE}{Format.BOLD}Dictionary{Format.CLEAR}\n', output)
     
     #* JSON-Response instance
     print(f'{Format.BLUE}{Format.BOLD}jsonify(sData) {Format.CLEAR}\n', jsonify(output))
