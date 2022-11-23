@@ -2,47 +2,104 @@ from flask import jsonify
 from werkzeug.exceptions import BadRequest
 
 from ..models.student import Student
+from ..database.db import db
 
-# students = [
-#     {'id': 1, 'name': 'Oliver', 'age': 24},
-#     {'id': 2, 'name': 'Matthieu', 'age': 26},
-#     {'id': 3, 'name': 'Kai', 'age': 26}
-# ]
+class Format():
+    ''' ASCI codes for formatting '''
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    CLEAR = '\033[0m'
 
 def index(req):
+    print(f"\n{Format.GREEN}{Format.BOLD}students.index() {Format.CLEAR}")
+    
+    #* Class instance
     students = Student.query.all()
+    print(f"{Format.BLUE}{Format.BOLD}Student.query.all() {Format.CLEAR}\n", students)
+    
+    #* Map instance
     output = map(lambda p: { 
+        "id": p.id,
         "name": p.name, 
         "age": p.age
         }, students)
-    return jsonify(list(output)), 200
-    # return [s for s in students], 200
+    print(f"{Format.BLUE}{Format.BOLD}map(lambda p: ... {Format.CLEAR}\n", output)
+    
+    #* List instance
+    usable_output = list(output)
+    print(f"{Format.BLUE}{Format.BOLD}list() {Format.CLEAR}\n", usable_output)
+    
+    #* JSON-Response instance
+    print(f"{Format.BLUE}{Format.BOLD}jsonify() {Format.CLEAR}\n", jsonify(usable_output))
+    return usable_output, 200
 
-# def show(req, uid):
-#     return find_by_uid(uid), 200
+def show(req, uid):
+    print(f"\n{Format.GREEN}{Format.BOLD}students.show() {Format.CLEAR}")
+    
+    foundStudent = find_by_uid(uid)
+    #* Dictionary instance
+    output = {"name": foundStudent.name, "age": foundStudent.age}
+    print(f'{Format.BLUE}{Format.BOLD} {Format.CLEAR}\n', output)
+    
+    #* JSON-Response instance
+    print(f'{Format.BLUE}{Format.BOLD}jsonify(sData) {Format.CLEAR}\n', jsonify(output))
+    return output, 200
 
-# def create(req):
-#     # new_student = req.get_json()
-#     new_student = req.json
-#     new_student['id'] = sorted([s['id'] for s in students])[-1] + 1
-#     students.append(new_student)
-#     return new_student, 201
+def create(req):
+    print(f"\n{Format.GREEN}{Format.BOLD}students.create() {Format.CLEAR}")
+    
+    sData = req.json
+    #* JSON-Request instance
+    print(f'{Format.BLUE}{Format.BOLD}request {Format.CLEAR}\n', req)
+    #* JSON instance
+    print(f'{Format.BLUE}{Format.BOLD}request.json {Format.CLEAR}\n', sData)
 
-# def update(req, uid):
-#     student = find_by_uid(uid)
-#     data = req.get_json()
-#     print(data)
-#     for key, val in data.items():
-#         student[key] = val
-#     return student, 200
+    # No need to convert to a Map instance as there is only one item
+    #* Class instance    
+    new_student = Student(
+        name = sData['name'],
+        age = sData['age']
+        )
+    print(f'{Format.BLUE}{Format.BOLD}Student(...sData){ Format.CLEAR}\n', new_student)
+    
+    db.session.add(new_student)
+    db.session.commit()
+    
+    #* JSON-Response instance
+    print(f'{Format.BLUE}{Format.BOLD}jsonify(sData) {Format.CLEAR}\n', jsonify(sData))
+    return sData, 201
 
-# def destroy(req, uid):
-#     student = find_by_uid(uid)
-#     students.remove(student)
-#     return student, 204
+def update(req, uid):
+    print(f"\n{Format.GREEN}{Format.BOLD}students.update() {Format.CLEAR}")#
+    
+    foundStudent = find_by_uid(uid)
+    if req.json.get('name') != None:
+        foundStudent.name = req.json['name']
+    if req.json.get('age') != None:
+        foundStudent.age = req.json['age']
+    db.session.commit()
+    
+    resp, code = show(req, uid)
+    return resp, 200
 
-# def find_by_uid(uid):
-#     try:
-#         return next(student for student in students if student['id'] == uid)
-#     except:
-#         raise BadRequest(f"We don't have that student with id {uid}!")
+def destroy(req, uid):
+    print(f"\n{Format.GREEN}{Format.BOLD}students.destroy() {Format.CLEAR}")
+
+    foundStudent = find_by_uid(uid)
+    db.session.delete(foundStudent)
+    db.session.commit()
+    return { "message" : "deleted" }, 204
+
+
+def find_by_uid(uid):
+    print(f"\n{Format.GREEN}{Format.BOLD}students.find_by_uid() {Format.CLEAR}")
+    try:
+        #* Class instance
+        foundStudent = Student.query.filter_by(id = int(uid)).first()
+        print(f'{Format.BLUE}{Format.BOLD}Student.query... {Format.CLEAR}\n', foundStudent)
+
+        return foundStudent
+    except:
+        raise BadRequest(f"We don't have that student with id {uid}!")
