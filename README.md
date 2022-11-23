@@ -9,5 +9,6 @@
 4. depends on your OS, You need to use `gunicorn` for MacOS or `waitress` for Windows
 
 ### Usage
+- `pipenv run init_db` for initialise the database  
 - `pipenv run start` for start the server  
 - `pipenv run dev` for start the dev server  
